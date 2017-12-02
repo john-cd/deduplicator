@@ -4,20 +4,69 @@ version := "0.1"
 
 scalaVersion := "2.12.4"
 
+// Logs
 libraryDependencies += "com.typesafe.scala-logging" %% "scala-logging" % "3.7.2"
 
 // https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12
 libraryDependencies += "org.slf4j" % "slf4j-log4j12" % "1.7.25" % Test
 
+// Command Line Interface
+libraryDependencies += "com.github.scopt" %% "scopt" % "3.7.0"
 
+// Config
 libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+// Commons
+libraryDependencies += "commons-codec" % "commons-codec" % "1.11"
 
+// Concurrency 
 libraryDependencies ++= Seq(
   "com.typesafe.akka" %% "akka-actor" % "2.5.6",
   "com.typesafe.akka" %% "akka-testkit" % "2.5.6" % Test
 )
 
+// Migration
+libraryDependencies += "org.flywaydb" % "flyway-core" % "4.2.0"
+		
+// Database		
 // https://mvnrepository.com/artifact/com.h2database/h2
 libraryDependencies += "com.h2database" % "h2" % "1.4.196" //% Test
+
+// Tests
+libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
+
+/*
+
+import sbt._
+import Keys._
+
+name := "deduplicator"
+
+lazy val commonSettings = Seq(
+  organization := "deduplicator",
+  version := "1.0-SNAPSHOT",
+  scalaVersion := "2.12.4"
+)
+
+lazy val overall = (project in file("."))
+  .settings(commonSettings)
+  .aggregate(sub1)
+
+lazy val common = (project in file("common"))
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "org.flywaydb" % "flyway-core" % "4.1.2")
+  )
+
+lazy val sub1 = (project in file("slick"))
+  .settings(commonSettings)
+  .settings(
+    libraryDependencies ++= Seq(
+      "com.typesafe.slick" %% "slick" % "3.2.0"
+    )
+  )
+  .dependsOn(common)
+  
+*/  

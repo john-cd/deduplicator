@@ -1,13 +1,12 @@
 package deduplicator
 
 import akka.actor.{Props, ActorSystem}
-import deduplicator.actors.messages._
 import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-object Scheduler extends LazyLogging {
+object Main extends LazyLogging {
 
   import deduplicator.registry.ComponentRegistry._
   

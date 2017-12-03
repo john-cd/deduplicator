@@ -20,7 +20,7 @@ object ComponentRegistry extends AppConfigComponent
   override val commandLineService: CommandLineService = new CommandLineService
   override val appConfigService: ComponentRegistry.AppConfigService = new AppConfigService
   override val ioService: ComponentRegistry.IOService = new IOService
-  override val hashService: Hasher = new Md5Hasher 
+  override val hashService: Hasher = Hasher()
   override val databaseService: DatabaseService = new H2DatabaseService
   override val migrationService: ComponentRegistry.MigrationService = new MigrationService
   override val daoService: DaoService = new DaoServiceImpl

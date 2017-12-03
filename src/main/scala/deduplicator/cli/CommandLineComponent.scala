@@ -20,7 +20,7 @@ trait CommandLineComponent {
 			  
 			  opt[Unit]('r', "recursive").action( (_, c) => c.copy(recursive = true) ).text("recurse through all children folders")
 
-			  arg[File]("<file>...").required().withFallback(() => new File(".")).unbounded().action( (x, c) =>
+			  arg[File]("<file>...").optional().withFallback(() => new File(".")).unbounded().action( (x, c) =>
 				c.copy(paths = c.paths :+ x) ).text("optional unbounded args")
 
 			//  note("some notes.".newline)		

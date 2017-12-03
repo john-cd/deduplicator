@@ -1,10 +1,7 @@
 package deduplicator
 
-import akka.actor.{Props, ActorSystem}
 import com.typesafe.scalalogging.LazyLogging
-
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
+import scala.io.StdIn
 
 object Main extends LazyLogging {
 
@@ -13,34 +10,21 @@ object Main extends LazyLogging {
   def main(args: Array[String]): Unit = {
   
 	commandLineService.parse(args) match {
-	  case Some(config) => {
-		// do stuff
-	  }
-
-	  case None => System.exit(1)
-		// arguments are bad, error message will have been displayed
+	  case Some(cliconfig) => doWork(cliconfig)
+	  case None => System.exit(1) // Bad arguments. Error message has been displayed
 	}
+  }
+  
+  private def doWork(cliconfig: CommandLineConfig) = { 
   
 	logger.info("Running migrations before doing anything else.")
 	migrationService.migrate()
 	logger.info("Migrations done!")
 
-	
-    val system = ActorSystem("deduplicator")
+	//logger.info("Starting actor system. Use CTRL+C to exit.")
+    //actorService.start("deduplicator")
 
-    val master = system.actorOf(
-      Props(actorFactory.createMasterActor()),
-      "master"
-    )
-
-    sys.addShutdownHook({
-      logger.info("Awaiting actor system termination.")
-      // not great...
-      Await.result(system.terminate(), Duration.Inf)
-      logger.info("Actor system terminated. Bye!")
-    })
-
-    //master ! FindDuplicates()
-    logger.info("Started! Use CTRL+C to exit.")
-  }
+	println(">>> Press ENTER to exit <<<")
+    StdIn.readLine()
+  }  
 }

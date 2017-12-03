@@ -4,7 +4,7 @@ import deduplicator.cli._
 import deduplicator.config._
 import deduplicator.io.IOServiceComponent
 import deduplicator.dao._
-import deduplicator.actors._ //{ActorFactory, ActorFactoryComponent}
+import deduplicator.actors._ 
 import deduplicator.hash._
 
 

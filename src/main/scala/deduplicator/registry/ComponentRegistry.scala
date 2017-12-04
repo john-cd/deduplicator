@@ -15,7 +15,7 @@ object ComponentRegistry extends AppConfigComponent
   with DatabaseServiceComponent
   with MigrationComponent
   with DaoServiceComponent
-  with ActorFactoryComponent
+  with ActorComponent
 {
   override val commandLineService: CommandLineService = new CommandLineService
   override val appConfigService: ComponentRegistry.AppConfigService = new AppConfigService
@@ -24,5 +24,5 @@ object ComponentRegistry extends AppConfigComponent
   override val databaseService: DatabaseService = new H2DatabaseService
   override val migrationService: ComponentRegistry.MigrationService = new MigrationService
   override val daoService: DaoService = new DaoServiceImpl
-  override val actorFactory: ActorFactory = new ActorFactoryImpl
+  override val actorService: ActorService = new ActorServiceImpl
 }

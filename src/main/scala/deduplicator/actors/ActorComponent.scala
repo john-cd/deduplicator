@@ -1,5 +1,9 @@
 package deduplicator.actors
 
+// TO READ:
+// https://developer.lightbend.com/guides/akka-distributed-workers-scala/back-end.html
+// http://letitcrash.com/post/29044669086/balancing-workload-across-nodes-with-akka-2
+
 import akka.actor.{Props, ActorSystem}
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
@@ -7,33 +11,29 @@ import com.typesafe.scalalogging.LazyLogging
 
 
 trait ActorComponent extends LazyLogging {
-  //this: ActorFactoryComponent =>
 
   val actorService: ActorService
 
   trait ActorService {
+    def run(actorSystemName: String): Unit
+  }
+  
+  class ActorServiceImpl extends ActorService {
   	 
-	def start(actorSystemName: String): Unit = {
+	override def run(actorSystemName: String = "main actor system"): Unit = {
 
 	  // Create the actor system
 	  val system: ActorSystem = ActorSystem(actorSystemName)
 
 	  try {
-		//  val printer: ActorRef = system.actorOf(Printer.props, "printerActor")
-		
-		//val master = system.actorOf(Props(actorFactory.createMasterActor()),"master")
+	    // Create top level supervisor
+        val supervisor = system.actorOf(Supervisor.props(), "supervisor")
 
-    sys.addShutdownHook({
-      logger.info("Awaiting actor system termination.")
-      // not great...
-      Await.result(system.terminate(), Duration.Inf)
-      logger.info("Actor system terminated. Bye!")
-    })
-
-    //master ! FindDuplicates()
+        //supervisor ! FindDuplicates() 
 
 	  } finally {
 		system.terminate()
+		//TODO system.awaitTermination()
 	  }
 	}
   }

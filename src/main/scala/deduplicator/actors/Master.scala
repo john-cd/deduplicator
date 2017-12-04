@@ -1,33 +1,32 @@
 package deduplicator.actors
 
-import com.typesafe.scalalogging.LazyLogging
 import collection.mutable.ListBuffer
-import akka.actor.{Props, Cancellable, Actor}
+import akka.actor.{Props, Cancellable, Actor, ActorLogging}
 import akka.routing.RoundRobinPool
-
+import java.io.File
 
 object Master {
-  def props(numWorkers: Int, actorFactory: ActorFactory): Props = Props(new Master(numWorkers, actorFactory))
-  //def props: Props = Props[Master]
+  def props(numWorkers: Int): Props = Props(classOf[Master], numWorkers)
 
-  final case class FindDuplicates()
-  
+  final case class FindDuplicates(paths: Seq[File], recursive: Boolean)
+  final case class Done()
 }
 
-class Master(numWorkers: Int, actorFactory: ActorFactory) extends Actor with LazyLogging {
+class Master(numWorkers: Int) extends Actor with ActorLogging {
   import Master._
   
   val cancelables = ListBuffer[Cancellable]()
 
-  val router = context.actorOf(
-    Props(actorFactory.createWorkerActor()).withRouter(RoundRobinPool(numWorkers)),
-    "master-worker-router"
-  )
-
-  override def receive: Receive = { case _ => }
+  // val router = context.actorOf(
+    // Worker.props(daoService).withRouter(RoundRobinPool(numWorkers)),
+    // "master-worker-router"
+  // )
+  
+  
+  override def receive: Receive = { case _ => log.info(s"Unknown message received from ${sender()}") }
 
   //  override def receive: Receive = {
-  //    case Done(name, command, jobType, success) =>
+  //    case Done(name, command, success) =>
   //      if (success) {
   //        logger.info("Successfully completed {} ({}).", name, command)
   //      } else {

@@ -8,7 +8,8 @@ import deduplicator.dao._
 import sys.process._
 
 object Worker {
-  def props(daoService: DaoService): Props = Props(new Worker(daoService: DaoService))
+  def props(daoService: DaoService): Props = Props(new Worker(daoService))
+  //def props(): Props = Props[Worker] 
   
   sealed trait Message
   final case class Work(name: String, command: String) extends Message

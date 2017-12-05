@@ -1,64 +1,72 @@
 package deduplicator.hash
 
-import java.io.{File, FileInputStream, InputStream}
-import java.security.{DigestInputStream, MessageDigest}
+import deduplicator.io.FileAsyncIO
 
+import scala.util.control.NonFatal
+import java.nio.file.{Files, Paths}
+import java.security.MessageDigest
+
+import com.typesafe.scalalogging.LazyLogging
 import org.apache.commons.codec.binary.Hex
 
+import scala.util.{Failure, Success}
+
+// the following is equivalent to `implicit val ec = ExecutionContext.global`
+import scala.concurrent._
+import ExecutionContext.Implicits.global
 
 trait HashComponent {
+  val hashService: HashService
+}
 
-  val hashService: Hasher
+object HashService {
+  private lazy val md = MessageDigest.getInstance("MD5")
 
-  object Hasher {
-    private lazy val md = MessageDigest.getInstance("MD5")
-    def apply() = new Hasher
-  }
-  
-  class Hasher {
-    import Hasher._
-	
-    def checksum(filepath: String): String = {
-	 checksum(new FileInputStream(filepath))
-	}
-	
-	def checksum(stream: InputStream): String = {
-      val buffer = new Array[Byte](8192)
-      md.reset()
-      val dis = new DigestInputStream(stream, md)
-      try {
-          while (dis.read(buffer) != -1) {}
-	  }
-      finally {
-        dis.close()
+  def apply() = new HashService
+}
+
+class HashService extends LazyLogging {
+
+  import HashService._
+
+  def checksum(filePath: String): Option[String] = {
+    require(filePath != null)
+    try {
+      val path = Paths.get(filePath).normalize
+      if (!Files.isReadable(path) || Files.isDirectory(path)) // readable = existing and accessible
+        None
+      else {
+        md.reset()
+
+        // read block after block of data
+        // note: tailrec is not required, since Futures are asynchronous
+        def recurse(position: Long): Unit = {
+          FileAsyncIO.read(path, position).onComplete {
+            case Success(arr) => if (arr.length > 0) {
+              md.update(arr);
+              recurse(position + arr.length) // update the message digest and process the next block
+            }
+            case Failure(exc) =>
+          }
+        }
+
+        //          var pos = 0L
+        //          while(FileAsyncIO.read(path, pos) )
+
+
+        Some(new String(Hex.encodeHex(md.digest()))) // or: md.digest.map("%02x".format(_)).mkString
+        // note: do not intern that String!
       }
-	  new String(Hex.encodeHex(md.digest()))  // or: md.digest.map("%02x".format(_)).mkString
-	  // note: do not intern the String! 
     }
-  }  
+    catch {
+      case NonFatal(e) => {
+        logger.info(s"checksum(stream: InputStream) throws ${e}");
+        throw e
+      }
+    }
+
+  }
 }
 
 
-//trait Hasher {
-//  def hash(data: String): String
-//
-//  protected def getDigest(algorithm: String, data: String) = {
-//    val crypt = MessageDigest.getInstance(algorithm)
-//    crypt.reset()
-//    crypt.update(data.getBytes("UTF-8"))
-//    crypt
-//  }
-//}
-//
-//class Sha1Hasher extends Hasher {
-//  override def hash(data: String): String = new String(Hex.encodeHex(getDigest("SHA-1", data).digest()))
-//}
-//
-//class Sha256Hasher extends Hasher {
-//  override def hash(data: String): String = new String(Hex.encodeHex(getDigest("SHA-256", data).digest()))
-//}
-//
-//class Md5Hasher extends Hasher {
-//  override def hash(data: String): String = new String(Hex.encodeHex(getDigest("MD5", data).digest()))
-//}
 

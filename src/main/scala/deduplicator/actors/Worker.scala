@@ -1,24 +1,58 @@
 package deduplicator.actors
 
-import com.typesafe.scalalogging.LazyLogging
-import akka.actor.{Props, Cancellable, Actor}
+import scala.util.{Failure, Success, Try}
+import akka.actor.{Actor, ActorLogging, Cancellable, Props}
 import akka.routing.RoundRobinPool
-
-import deduplicator.dao._
-import sys.process._
+import deduplicator.hash._
 
 object Worker {
-  def props(daoService: DaoService): Props = Props(new Worker(daoService))
-  //def props(): Props = Props[Worker] 
-  
+  //def props(daoService: DaoService): Props = Props(new Worker(daoService))
+  def props(hasher: HashService): Props = Props(new Worker(hasher))
+
+
   sealed trait Message
-  final case class Work(name: String, command: String) extends Message
-  final case class Done(name: String, command: String, success: Boolean) extends Message
+
+  final case class HashFile(filepath: String) extends Message
+
+  final case class FileHashed(filepath: String, hash: Option[String]) extends Message
+
+  // final case class HashFilesInDirectory(dirpath: String)
+
 }
 
-class Worker(daoService: DaoService) extends Actor with LazyLogging {
-	import Worker._
+class Worker(hashService: HashService) extends Actor with ActorLogging {
 
+  import Worker._
+
+  require(hashService != null)
+
+  override def receive: Receive = {
+    case HashFile(filepath) => {
+      val hash = hashService.checksum(filepath)
+      sender() ! FileHashed(filepath, hash)
+    }
+  }
+}
+
+// // https://doc.akka.io/docs/akka/snapshot/actors.html#extending-actors-using-partialfunction-chaining
+// trait ReadFileBehavior {
+// this: Actor with ActorLogging =>
+
+// val readFileBehavior: Receive = {
+// case  =>
+// log.info("{}", )
+// }
+// }
+
+// class ProducerConsumer extends Actor with ActorLogging
+// with readFileBehavior with ConsumerBehavior {
+
+// def receive = readFileBehavior.orElse[Any, Unit](consumerBehavior)
+// }	
+
+// def props(daoService: DaoService): Props = Props(new Worker(daoService))
+// final case class Work(name: String, command: String) extends Message
+// final case class Done(name: String, command: String, success: Boolean) extends Message
 //  private def doWork(work: Work): Unit = {
 //    work.jobType match {
 //      case Console =>
@@ -49,8 +83,5 @@ class Worker(daoService: DaoService) extends Actor with LazyLogging {
 //    }
 //  }
 //
-override def receive: Receive = {
-//    case w @ Work(name, command, jobType) => doWork(w)
-      case _ =>
- }
-}
+
+

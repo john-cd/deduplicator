@@ -1,15 +1,17 @@
 package deduplicator.actors
 
-import akka.actor.{ Actor, ActorLogging, Props }
+import akka.actor.{Actor, ActorLogging, Props}
 
 object RootActor {
   def props(): Props = Props[RootActor]
 }
 
 class RootActor extends Actor with ActorLogging {
+
   import RootActor._
 
   override def preStart(): Unit = log.info(s"${self.path} started")
+
   override def postStop(): Unit = log.info(s"${self.path} stopped")
 
   // Not recommended to override preRestart and postRestart
@@ -25,7 +27,7 @@ class RootActor extends Actor with ActorLogging {
   // def postRestart(reason: Throwable): Unit = {
   //   preStart()
   // }
-  
+
   // No need to handle any messages
   override def receive: Receive = Actor.emptyBehavior
 }

@@ -28,4 +28,5 @@ trait DatabaseServiceComponent {
     override val password: String = appConfigService.dbPassword
     override lazy val ds: DataSource = JdbcConnectionPool.create(connectionString, username, password)
   }
+
 }

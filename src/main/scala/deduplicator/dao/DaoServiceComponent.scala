@@ -27,4 +27,5 @@ trait DaoServiceComponent {
   class DaoServiceImpl extends DaoService {
     override def getConnection(): Connection = databaseService.getConnection
   }
+
 }

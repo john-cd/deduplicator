@@ -6,24 +6,25 @@ trait MigrationComponent {
   this: DatabaseServiceComponent =>
 
   val migrationService: MigrationService
-  
+
   class MigrationService {
- 
+
     def migrate(): Unit = {
-	
-	    val dbs = databaseService
-	
-        // Create the Flyway instance
-        val flyway = new Flyway()
-        // Point it to the database
-        flyway.setDataSource(dbs.connectionString, dbs.username, dbs.password); // "jdbc:h2:file:./target/foobar", "sa", null
-        // Start the migration
-	    flyway.clean()
-        flyway.migrate()
+
+      val dbs = databaseService
+
+      // Create the Flyway instance
+      val flyway = new Flyway()
+      // Point it to the database
+      flyway.setDataSource(dbs.connectionString, dbs.username, dbs.password); // "jdbc:h2:file:./target/foobar", "sa", null
+      // Start the migration
+      flyway.clean()
+      flyway.migrate()
     }
   }
+
 }
-  
+
 /*  
   import java.sql.Connection
 

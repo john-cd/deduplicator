@@ -17,12 +17,13 @@ class Master(numWorkers: Int) extends Actor with ActorLogging {
 
   val cancelables = ListBuffer[Cancellable]()
 
+  // TODO
   // val router = context.actorOf(
   // Worker.props(daoService).withRouter(RoundRobinPool(numWorkers)),
   // "master-worker-router"
   // )
 
-
+  // TODO
   override def receive: Receive = {
     case _ => log.info(s"Unknown message received from ${sender()}")
   }

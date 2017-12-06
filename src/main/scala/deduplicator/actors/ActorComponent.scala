@@ -38,6 +38,7 @@ trait ActorComponent extends LazyLogging {
 
     import ActorServiceImpl._
 
+    // TODO
     override def run(): Unit = using(system => {
       //val supervisor = system.actorOf(Supervisor.props(), "supervisor")
       //supervisor ! FindDuplicates()
@@ -48,8 +49,8 @@ trait ActorComponent extends LazyLogging {
       //      val watch = system.actorOf(FileSystemWatchActor.props(null), "fileSystemWatch")
       //      watch ! Register(Paths.get(raw"src\test\resources\testfilesystem"), recurse = false)
 
-      println(">>> Press ENTER to exit <<<")
-      scala.io.StdIn.readLine()
+//      println(">>> Press ENTER to exit <<<")
+//      scala.io.StdIn.readLine()
 
     })
   }

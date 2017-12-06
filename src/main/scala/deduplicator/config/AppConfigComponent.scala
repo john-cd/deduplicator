@@ -23,11 +23,11 @@ trait AppConfigComponent {
     conf.checkValid(ConfigFactory.defaultReference(), "deduplicator")
 
     private val appConf = conf.getConfig("deduplicator") // will throw if not present  / wrong type
-    val workers = appConf.getInt("workers") // etc...
+    val workers: Int = appConf.getInt("workers") // etc...
     private val db = appConf.getConfig("db")
-    val dbConnectionString = db.getString("connection-string")
-    val dbUsername = db.getString("username")
-    val dbPassword = db.getString("password")
+    val dbConnectionString: String = db.getString("connection-string")
+    val dbUsername: String = db.getString("username")
+    val dbPassword: String = db.getString("password")
   }
 
 }

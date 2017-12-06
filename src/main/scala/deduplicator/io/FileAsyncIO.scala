@@ -47,11 +47,11 @@ object FileAsyncIO extends LazyLogging {
       val fileSize = channel.size()
       val remainingBytes: Long = math.max(fileSize - position, 0L)
       if (fileSize == 0)
-        p.success(Block()) // "empty file"  // TODO
+        p.success(Block()) // "empty file"  // TODO test
       if (remainingBytes <= 0)
-        p.success(Block()) // "position past the end of the file - no bytes to read!"  // TODO
+        p.success(Block()) // "position past the end of the file - no bytes to read!"  // TODO test
       else {
-        val maxBufferSize = math.min(remainingBytes.toInt, Int.MaxValue) // files may be of length > 2
+        val maxBufferSize = math.min(remainingBytes.toInt, Int.MaxValue) // files may be of length > 2^32  // TODO test
         val buffer = ByteBuffer.allocate(math.min(if (desiredSize > 0) desiredSize else defaultBufferSize, maxBufferSize))
         channel.read(buffer, position, buffer, onComplete(channel, position, p))
       }

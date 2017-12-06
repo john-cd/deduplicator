@@ -1,4 +1,4 @@
-package deduplicator.io
+package deduplicator.io.filewatch
 
 import java.io.IOException
 import java.nio.file._

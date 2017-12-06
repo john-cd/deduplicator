@@ -23,6 +23,9 @@ object FileSystemWalker extends LazyLogging {
     * @return
     */
   // see also: https://docs.oracle.com/javase/tutorial/essential/io/walk.html
+  // alternatives:
+  // Files.walk(start, FileVisitOption.FOLLOW_LINKS).iterator().asScala
+  // https://docs.oracle.com/javase/7/docs/api/java/nio/file/DirectoryStream.html
   def walk(start: Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean): Unit = {
 
     if (!Files.isDirectory(start)) {
@@ -32,7 +35,7 @@ object FileSystemWalker extends LazyLogging {
       Files.walkFileTree(start, opts, Int.MaxValue, new Visitor(start, f, recurse))
   }
 
-
+  // TODO what if f returns Future
   private class Visitor[T](start: Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean) extends SimpleFileVisitor[Path] {
 
     //  Invoked for a directory before entries in the directory are visited.

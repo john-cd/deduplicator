@@ -8,6 +8,7 @@ object Supervisor {
 
 class Supervisor extends RootActor {
 
+  // TODO
   def createChild() = {
     // star child, then keep an eye on it
     // If child is killed or stopped, the Parent actor is sent a Terminated(child) message

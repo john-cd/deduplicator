@@ -22,6 +22,7 @@ object Main extends LazyLogging {
     }
   }
 
+  // TODO cleanup
   private def doWork(paths: Seq[String], recursive: Boolean): Unit = {
 
 

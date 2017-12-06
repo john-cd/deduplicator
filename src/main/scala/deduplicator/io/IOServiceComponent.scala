@@ -4,25 +4,15 @@ trait IOServiceComponent {
 
   val ioService: IOService
 
-  case class FilesAndDirs(val files: List[String])
-
   class IOService {
 
-    // Files.walk(start, FileVisitOption.FOLLOW_LINKS).iterator().asScala
-    // see also:
-    // https://docs.oracle.com/javase/7/docs/api/java/nio/file/DirectoryStream.html
-    //    def getAllFiles(start: Path): Iterator[String] = {
-    //
-    //
-    //
-    //    }
+    // TODO expose FileSystemWalker.walk()
 
   }
-
 }
 
 
-/*  Example code with java.io
+/*  Older example code using java.io
 	
     import java.io.File
 	

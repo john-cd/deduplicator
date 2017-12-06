@@ -25,7 +25,7 @@ trait MigrationComponent {
 
 }
 
-/*  
+/*  // older example code showing migration using java.sql
   import java.sql.Connection
 
     this: DatabaseServiceComponent =>

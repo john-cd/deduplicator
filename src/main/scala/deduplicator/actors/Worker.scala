@@ -27,6 +27,7 @@ class Worker(hashService: HashService) extends Actor with ActorLogging {
   override def receive: Receive = {
     case HashFile(filepath) => {
       val hash = hashService.checksum(filepath)
+      // TODO
       //pipe(hash) to sender()
       //sender() ! FileHashed(filepath, hash)
     }

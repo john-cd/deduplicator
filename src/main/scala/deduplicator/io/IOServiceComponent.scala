@@ -1,25 +1,38 @@
 package deduplicator.io
 
-import java.nio.file._
+import java.io.IOException
+import java.nio.file.FileVisitOption._
+import java.nio.file.FileVisitResult._
+import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{Files, Path, _}
+import java.util
 import scala.collection.JavaConverters._
+
+import com.typesafe.scalalogging.LazyLogging
 
 trait IOServiceComponent {
 
   val ioService: IOService
 
-
   case class FilesAndDirs(val files: List[String])
 
   class IOService {
 
-    //    def getAllFiles(fileOrDirPath: String): Iterator[String] = {
-    //
-    //      Files.walk(dir).iterator().asScala.filter(Files.isRegularFile(_)).foreach(println)
-    //
-    //    } // see also: https://docs.oracle.com/javase/7/docs/api/java/nio/file/DirectoryStream.html    https://docs.oracle.com/javase/tutorial/essential/io/walk.html
+    // Files.walk(start, FileVisitOption.FOLLOW_LINKS).iterator().asScala
+    // see also:
+    // https://docs.oracle.com/javase/7/docs/api/java/nio/file/DirectoryStream.html
+//    def getAllFiles(start: Path): Iterator[String] = {
+//
+//
+//
+//    }
+
   }
 
 }
+
+
+
 
 
 /*  Example code with java.io

@@ -15,15 +15,19 @@ object Main extends LazyLogging {
     }
   }
 
-  private def doWork(paths: Seq[String], recursive: Boolean) = {
-    logger.info("Running migrations before doing anything else.")
-    migrationService.migrate()
-    logger.info("Migrations done!")
+  private def doWork(paths: Seq[String], recursive: Boolean): Unit = {
 
-    logger.info("Starting actor system. Use CTRL+C to exit.")
+
+    //    logger.info("Running migrations before doing anything else.")
+    //    migrationService.migrate()
+    //    logger.info("Migrations done!")
+    //
+    //    logger.info("Starting actor system. Use CTRL+C to exit.")
     actorService.run()
 
-    //println(">>> Press ENTER to exit <<<
-    // StdIn.readLine()
+    // file system walking tests
+
+//    println(">>> Press ENTER to exit <<<")
+//    StdIn.readLine()
   }
 }

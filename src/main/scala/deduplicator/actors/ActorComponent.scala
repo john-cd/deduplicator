@@ -4,11 +4,11 @@ package deduplicator.actors
 // https://developer.lightbend.com/guides/akka-distributed-workers-scala/back-end.html
 // http://letitcrash.com/post/29044669086/balancing-workload-across-nodes-with-akka-2
 
-import akka.actor.{Props, ActorSystem}
+import akka.actor.{ActorSystem, Props}
+
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import com.typesafe.scalalogging.LazyLogging
-
 
 trait ActorComponent extends LazyLogging {
 
@@ -39,8 +39,18 @@ trait ActorComponent extends LazyLogging {
     import ActorServiceImpl._
 
     override def run(): Unit = using(system => {
-      val supervisor = system.actorOf(Supervisor.props(), "supervisor")
+      //val supervisor = system.actorOf(Supervisor.props(), "supervisor")
       //supervisor ! FindDuplicates()
+
+      //      import deduplicator.io._
+      //      import FileSystemWatchActor._
+      //      import java.nio.file._
+      //      val watch = system.actorOf(FileSystemWatchActor.props(null), "fileSystemWatch")
+      //      watch ! Register(Paths.get(raw"src\test\resources\testfilesystem"), recurse = false)
+
+      println(">>> Press ENTER to exit <<<")
+      scala.io.StdIn.readLine()
+
     })
   }
 

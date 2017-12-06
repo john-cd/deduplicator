@@ -15,8 +15,6 @@ object Master {
 
 class Master(numWorkers: Int) extends Actor with ActorLogging {
 
-  import Master._
-
   val cancelables = ListBuffer[Cancellable]()
 
   // val router = context.actorOf(

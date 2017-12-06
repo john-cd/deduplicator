@@ -1,7 +1,6 @@
 package deduplicator.actors
 
-import akka.actor.Props
-import akka.actor.Terminated
+import akka.actor.{Props, Terminated}
 
 object Supervisor {
   def props(): Props = Props[Supervisor]

@@ -1,6 +1,6 @@
 package deduplicator.dao
 
-import java.sql.{Connection, ResultSet, PreparedStatement}
+import java.sql.{Connection, PreparedStatement, ResultSet}
 
 trait DaoService {
   def getConnection(): Connection

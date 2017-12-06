@@ -1,9 +1,10 @@
 package deduplicator.io
 
 import java.nio.file.Path
+
+import akka.actor.{Actor, ActorLogging, ActorRef, Props, Timers}
+
 import scala.concurrent.duration._
-import akka.actor.Timers
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 
 /**
   * Non-blocking actor facade for WatchService
@@ -73,9 +74,9 @@ class FileSystemWatchActor(actorToNotify: ActorRef) extends Actor with Timers wi
     case Tick => {
       //log.debug("tick!")
       if (wd != null)
-        // poll() is not blocking:
-        // true = a key was found; there may be more
-        // false = nothing in the queue at this time; try later
+      // poll() is not blocking:
+      // true = a key was found; there may be more
+      // false = nothing in the queue at this time; try later
         while (wd.poll()) {}
       // re-arm the timer - better implementation than using periodic timer
       timers.startSingleTimer(TickKey, Tick, 5 second)

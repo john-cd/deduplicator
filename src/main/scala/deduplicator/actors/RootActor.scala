@@ -8,8 +8,6 @@ object RootActor {
 
 class RootActor extends Actor with ActorLogging {
 
-  import RootActor._
-
   override def preStart(): Unit = log.info(s"${self.path} started")
 
   override def postStop(): Unit = log.info(s"${self.path} stopped")

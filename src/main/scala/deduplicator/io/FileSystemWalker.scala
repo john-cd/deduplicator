@@ -6,9 +6,10 @@ import java.nio.file.FileVisitResult.{CONTINUE, SKIP_SUBTREE}
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 import java.util
-import scala.util.control._
 
 import com.typesafe.scalalogging.LazyLogging
+
+import scala.util.control._
 
 object FileSystemWalker extends LazyLogging {
 
@@ -16,13 +17,13 @@ object FileSystemWalker extends LazyLogging {
 
   /** Walk a Directory Tree
     *
-    * @param start directory path to start with
-    * @param f lambda that will be run for every file found in the director(ies)
+    * @param start   directory path to start with
+    * @param f       lambda that will be run for every file found in the director(ies)
     * @param recurse if true, recurse through all sub-directories
     * @return
     */
   // see also: https://docs.oracle.com/javase/tutorial/essential/io/walk.html
-  def walk(start: Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean) : Unit = {
+  def walk(start: Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean): Unit = {
 
     if (!Files.isDirectory(start)) {
       f(start, Files.readAttributes(start, classOf[BasicFileAttributes]))
@@ -32,7 +33,7 @@ object FileSystemWalker extends LazyLogging {
   }
 
 
-  private class Visitor[T](start:Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean) extends SimpleFileVisitor[Path] {
+  private class Visitor[T](start: Path, f: (Path, BasicFileAttributes) => Unit, recurse: Boolean) extends SimpleFileVisitor[Path] {
 
     //  Invoked for a directory before entries in the directory are visited.
     //  If this method returns CONTINUE, then entries in the directory are visited.

@@ -1,8 +1,6 @@
 package deduplicator.actors
 
-import scala.util.{Failure, Success, Try}
-import akka.actor.{Actor, ActorLogging, Cancellable, Props}
-import akka.routing.RoundRobinPool
+import akka.actor.{Actor, ActorLogging, Props}
 import deduplicator.hash._
 
 object Worker {
@@ -29,7 +27,8 @@ class Worker(hashService: HashService) extends Actor with ActorLogging {
   override def receive: Receive = {
     case HashFile(filepath) => {
       val hash = hashService.checksum(filepath)
-      sender() ! FileHashed(filepath, hash)
+      //pipe(hash) to sender()
+      //sender() ! FileHashed(filepath, hash)
     }
   }
 }

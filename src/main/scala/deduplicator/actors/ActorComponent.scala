@@ -4,11 +4,11 @@ package deduplicator.actors
 // https://developer.lightbend.com/guides/akka-distributed-workers-scala/back-end.html
 // http://letitcrash.com/post/29044669086/balancing-workload-across-nodes-with-akka-2
 
-import akka.actor.{ActorSystem, Props}
+import akka.actor.ActorSystem
+import com.typesafe.scalalogging.LazyLogging
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
-import com.typesafe.scalalogging.LazyLogging
 
 trait ActorComponent extends LazyLogging {
 

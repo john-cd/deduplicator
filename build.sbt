@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
 
 // Migration
 libraryDependencies += "org.flywaydb" % "flyway-core" % "4.2.0"
-		
+
 // Database		
 // https://mvnrepository.com/artifact/com.h2database/h2
 libraryDependencies += "com.h2database" % "h2" % "1.4.196" //% Test

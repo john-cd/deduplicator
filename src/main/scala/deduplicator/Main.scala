@@ -1,7 +1,14 @@
 package deduplicator
 
+import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
+
 import com.typesafe.scalalogging.LazyLogging
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.io.StdIn
+import scala.util.{Failure, Success}
 
 object Main extends LazyLogging {
 
@@ -23,11 +30,27 @@ object Main extends LazyLogging {
     //    logger.info("Migrations done!")
     //
     //    logger.info("Starting actor system. Use CTRL+C to exit.")
-    actorService.run()
+    // actorService.run()
 
     // file system walking tests
+    var hasher = deduplicator.hash.HashService()
 
-//    println(">>> Press ENTER to exit <<<")
-//    StdIn.readLine()
+
+    def test(path: Path, attrs: BasicFileAttributes = null): Future[String] = {
+      hasher.checksum(path).andThen {
+        case Success(h) => logger.info(s"$path -> $h")
+        case Failure(exc) => logger.warn("Hash failure: ", exc)
+      }
+    }
+    //    println(Await.ready( test(Paths.get(raw"src\test\resources\testfilesystem\d.txt")), 10 seconds ))  // blocking
+
+
+    deduplicator.io.FileSystemWalker.walk(
+      Paths.get(raw"src\test\resources\testfilesystem"),
+      test(_, _),
+      recurse = true)
+
+    //    println(">>> Press ENTER to exit <<<")
+    StdIn.readLine()
   }
 }

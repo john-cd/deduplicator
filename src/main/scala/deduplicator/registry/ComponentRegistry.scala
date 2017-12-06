@@ -1,11 +1,11 @@
 package deduplicator.registry
 
+import deduplicator.actors._
 import deduplicator.cli._
 import deduplicator.config._
-import deduplicator.io.IOServiceComponent
 import deduplicator.dao._
-import deduplicator.actors._
 import deduplicator.hash._
+import deduplicator.io.IOServiceComponent
 
 
 object ComponentRegistry extends AppConfigComponent

@@ -3,9 +3,11 @@ package deduplicator.io
 import java.io.IOException
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
+
 import com.typesafe.scalalogging.LazyLogging
+
+import scala.collection.JavaConverters._
 import scala.collection.mutable
-import collection.JavaConverters._
 
 /** Wrapper around WatchService - monitor changes to the file system
   * - register a given directory, optionally recursively
@@ -23,8 +25,6 @@ object WatchDir {
 
 @throws[IOException]
 class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => Unit) extends LazyLogging {
-
-  import WatchDir._
 
   private lazy val watcher: WatchService = FileSystems.getDefault.newWatchService
   private lazy val keys = mutable.Map[WatchKey, Path]()
@@ -108,7 +108,7 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
     *           ...now with system in current scope:
     *           import system.dispatcher
     *           system.scheduler.schedule(10 seconds, 1 seconds) {
-    *            while (wd.poll()) {}
+    *           while (wd.poll()) {}
     *           }
     */
   def poll(): Boolean = {

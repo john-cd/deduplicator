@@ -25,7 +25,7 @@ case class Block(data: Array[Byte], nextPosition: Long) {
 /**
   * File asynchronous IO wrapper around java.nio.file for scala Futures
   */
-object FileAsyncIO extends LazyLogging {
+class FileAsyncIO extends LazyLogging {
 
   private final val defaultBufferSize = 8 * 1024
 

@@ -1,9 +1,9 @@
 package deduplicator.dao
 
 import java.sql.Connection
-import javax.sql.DataSource
 
 import deduplicator.config.AppConfigComponent
+import javax.sql.DataSource
 import org.h2.jdbcx.JdbcConnectionPool
 
 trait DatabaseService {
@@ -11,9 +11,6 @@ trait DatabaseService {
   val connectionString: String
   val username: String
   val password: String
-  val ds: DataSource
-
-  def getConnection: Connection = ds.getConnection
 }
 
 trait DatabaseServiceComponent {
@@ -26,7 +23,6 @@ trait DatabaseServiceComponent {
     override val connectionString: String = appConfigService.dbConnectionString
     override val username: String = appConfigService.dbUsername
     override val password: String = appConfigService.dbPassword
-    override lazy val ds: DataSource = JdbcConnectionPool.create(connectionString, username, password)
   }
 
 }

@@ -1,57 +1,68 @@
 package deduplicator
 
 import java.nio.file._
-import java.nio.file.attribute.BasicFileAttributes
 
 import com.typesafe.scalalogging.LazyLogging
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.io.StdIn
-import scala.util.{Failure, Success}
+import scala.util._
+import scala.concurrent.ExecutionContext.Implicits.global
+
 
 object Main extends LazyLogging {
 
   import deduplicator.registry.ComponentRegistry._
 
   def main(args: Array[String]): Unit = {
-
     commandLineService.parse(args) match {
-      case Some(CommandLineConfig(paths, recursive)) => doWork(paths, recursive)
+      case Some(CommandLineConfig(pathStrings, recursive)) => doWork(pathStrings, recursive)
       case None => System.exit(1) // Bad arguments. Error message has been displayed
     }
   }
 
-  // TODO cleanup
-  private def doWork(paths: Seq[String], recursive: Boolean): Unit = {
+  private def doWork(pathStrings: Seq[String], recursive: Boolean, test: Boolean = true): Unit = {
+
+    logger.info("Running migrations before doing anything else")
+    migrationService.migrate()
+    logger.info("Migrations done!")
+
+    val path = if (test)
+      Iterator(Paths.get(raw"src\test\resources\testfilesystem"))
+    else
+      for (path <- pathStrings) yield Paths.get(path)
+
+    for (path <- path) {
+      logger.info(s"Starting walking $path")
+      val iter: Iterator[Future[Hash]] = fileSystemWalker.walk(path, hashService.checksum, recurse = true)
+      val (i1, i2) = iter.duplicate
+
+      i1.foreach( _.onComplete {
+         case Success(h) => logger.info(s"${h.path} -> ${h.toHexString}")
+         case Failure(exc) => logger.warn("Hash failure: ", exc)
+      })
+
+      val groupedFut = i2.grouped(500)   // TODO handle case when a Future in the batch fails - see deduplicator.utils._ package object
+        .map {
+          (group: Seq[Future[Hash]]) =>
+            Future.traverse(group)(fut => fut)  // OR Future.sequence(group)
+                .map( seq => daoService.insertHashes(seq.toIterator) )  // TODO insert should return something
+
+        } //foreach
+      logger.info(s"Walking complete for $path")
+    } //for
 
 
-    //    logger.info("Running migrations before doing anything else.")
-    //    migrationService.migrate()
-    //    logger.info("Migrations done!")
-    //
-    //    logger.info("Starting actor system. Use CTRL+C to exit.")
-    // actorService.run()
+    // TODO wait for all Futures to be completed
+    // Future.sequence(groupedFut).wait()
 
-    // file system walking tests
-    var hasher = deduplicator.hash.HashService()
+    // TODO
+    // daoService.findDuplicates
 
+    println("------------------------------- DETAILS -------------------------------")
+    // daoService.readHashes.foreach( h => println(s" ${h.id} [ ${h.timeStamp} ] ${h.path} --> ${h.hash}"))
 
-    def test(path: Path, attrs: BasicFileAttributes = null): Future[String] = {
-      hasher.checksum(path).andThen {
-        case Success(h) => logger.info(s"$path -> $h")
-        case Failure(exc) => logger.warn("Hash failure: ", exc)
-      }
-    }
-    //    println(Await.ready( test(Paths.get(raw"src\test\resources\testfilesystem\d.txt")), 10 seconds ))  // blocking
-
-
-    deduplicator.io.FileSystemWalker.walk(
-      Paths.get(raw"src\test\resources\testfilesystem"),
-      test(_, _),
-      recurse = true)
-
-    //    println(">>> Press ENTER to exit <<<")
+    println(">>> Press ENTER to exit <<<")
     StdIn.readLine()
-  }
-}
+  } // doWork
+} // Main

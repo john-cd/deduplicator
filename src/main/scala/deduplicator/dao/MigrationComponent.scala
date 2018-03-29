@@ -1,25 +1,32 @@
 package deduplicator.dao
 
+import com.typesafe.scalalogging.LazyLogging
 import org.flywaydb.core.Flyway
+import org.h2.jdbcx.JdbcConnectionPool
 
 trait MigrationComponent {
   this: DatabaseServiceComponent =>
 
   val migrationService: MigrationService
 
-  class MigrationService {
+  class MigrationService extends LazyLogging {
 
     def migrate(): Unit = {
-
-      val dbs = databaseService
-
-      // Create the Flyway instance
-      val flyway = new Flyway()
-      // Point it to the database
-      flyway.setDataSource(dbs.connectionString, dbs.username, dbs.password); // "jdbc:h2:file:./target/foobar", "sa", null
-      // Start the migration
-      flyway.clean()
-      flyway.migrate()
+      var ds: JdbcConnectionPool = null
+      try {
+        val ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
+        // Create the Flyway instance
+        val flyway = new Flyway()
+        // Point it to the database
+        flyway.setDataSource(ds)
+        // Start the migration
+        flyway.clean()
+        flyway.migrate()
+      }
+      finally {
+        if (ds != null)
+          ds.dispose()
+      }
     }
   }
 

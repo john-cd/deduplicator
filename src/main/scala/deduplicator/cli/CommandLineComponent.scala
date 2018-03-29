@@ -11,7 +11,7 @@ trait CommandLineComponent {
 
   case class CommandLineConfig(pathStrings: Seq[String] = Seq(), recursive: Boolean = false)
 
-  class CommandLineService  extends LazyLogging {
+  class CommandLineService extends LazyLogging {
 
     def parse(args: Seq[String]): Option[CommandLineConfig] = parser.parse(args, CommandLineConfig())
 

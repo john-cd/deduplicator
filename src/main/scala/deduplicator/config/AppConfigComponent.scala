@@ -10,6 +10,7 @@ trait AppConfigComponent {
   /** Load config settings from application.conf (checking first against reference.conf)
     * https://lightbend.github.io/config/latest/api/com/typesafe/config/Config.html	
     */
+  //noinspection SpellCheckingInspection
   class AppConfigService extends LazyLogging {
     //-Dconfig.resource=production.conf for overriding
 

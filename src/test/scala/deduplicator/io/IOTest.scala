@@ -3,6 +3,7 @@ package deduplicator.io
 import java.nio.file._
 import java.nio.file.attribute.BasicFileAttributes
 
+//noinspection SpellCheckingInspection
 class IOTest {
 
   //val currentDirectory = new java.io.File(".").getCanonicalPath

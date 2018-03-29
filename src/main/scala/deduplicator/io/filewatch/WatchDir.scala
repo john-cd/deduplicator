@@ -74,8 +74,8 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
 
   def unregisterOne(dir: Path): Unit = {
     keys.filter(_._2 == dir).foreach(key_path => {
-      val k = key_path._1;
-      k.cancel();
+      val k = key_path._1
+      k.cancel()
       keys -= k
     })
   }
@@ -116,7 +116,7 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
       // Returns a queued key, if available. Returns immediately with a null value, if unavailable.
       val key: WatchKey = watcher.poll()
       if (key == null)
-        return false
+        false
       else {
         // Retrieves and removes all pending events for this watch key, returning a List of the events that were retrieved.
         // Note that this method does not wait if there are no events pending.
@@ -124,7 +124,7 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
           val event = e.asInstanceOf[WatchEvent[Path]]
 
           // watchable() returns the object / Path for which this watch key was created.
-          val registeredpath = key.watchable().asInstanceOf[Path]
+          val registeredPath = key.watchable().asInstanceOf[Path]
 
           //  the context is a Path that is the relative path between the directory registered with the watch service,
           // and the entry that is created, deleted, or modified.
@@ -133,7 +133,7 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
           // Resolve the filename against the directory.
           // If the filename is "test" and the directory is "foo",
           // the resolved name is "test/foo".
-          val path = registeredpath.resolve(relativePath)
+          val path = registeredPath.resolve(relativePath)
 
           event.kind() match {
 
@@ -169,13 +169,13 @@ class WatchDir(created: Path => Unit, modified: Path => Unit, deleted: Path => U
         if (!valid) {
           logger.warn(s"Key not valid: $key")
         }
-        return true
+        true
       } // else
     }
     catch {
-      case e: ClosedWatchServiceException =>
+      case _: ClosedWatchServiceException =>
         logger.warn("ClosedWatchServiceException")
-        return false
+        false
     }
   } // poll
 } // class

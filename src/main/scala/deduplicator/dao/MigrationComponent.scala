@@ -14,7 +14,7 @@ trait MigrationComponent {
     def migrate(): Unit = {
       var ds: JdbcConnectionPool = null
       try {
-        val ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
+        ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
         // Create the Flyway instance
         val flyway = new Flyway()
         // Point it to the database

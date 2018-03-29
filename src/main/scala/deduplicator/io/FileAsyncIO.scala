@@ -62,7 +62,7 @@ class FileAsyncIO extends LazyLogging {
     p.future
   }
 
-  private def closeSafely(channel: AsynchronousFileChannel) =
+  private def closeSafely(channel: AsynchronousFileChannel): Unit =
     try {
       channel.close()
     } catch {

@@ -18,9 +18,10 @@ trait HashComponent {
 
   val hashService: HashService
 
-  case class Hash(id: Option[Long] = None, timeStamp: Long = System.currentTimeMillis(), path: Path, hash: Array[Byte]){
+  case class Hash(id: Option[Long] = None, timeStamp: Long = System.currentTimeMillis(), path: Path, hash: Array[Byte]) {
 
     def toHexString: String = new String(Hex.encodeHex(hash))
+
     // or: md.digest.map("%02x".format(_)).mkString
     // note: do not intern that String!
 
@@ -32,12 +33,12 @@ trait HashComponent {
 
     /**
       *
-      * @param path
-      * @return
+      * @param path file path
+      * @return in the future, the file's MD5 hash value and associated values
       */
     def checksum(path: Path): Future[Hash] = {
       require(path != null)
-      logger.info(s"Starting checksum of ${path}")
+      logger.info(s"Starting checksum of $path")
       try {
         val md = MessageDigest.getInstance("MD5")
         if (!Files.isReadable(path)) // readable = existing and accessible
@@ -55,7 +56,8 @@ trait HashComponent {
             blk => if (blk.nextPosition != -1L) recurse(blk.nextPosition) else Future.successful(blk)
           }
 
-          recurse(0L).map { ignore => Hash(path = path, hash = md.digest()) }
+          recurse(0L).map { //noinspection ScalaUnusedSymbol
+            ignore => Hash(path = path, hash = md.digest()) }
         } // else
       } // try
       catch {

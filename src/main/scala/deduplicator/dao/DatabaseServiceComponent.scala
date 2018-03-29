@@ -1,10 +1,6 @@
 package deduplicator.dao
 
-import java.sql.Connection
-
 import deduplicator.config.AppConfigComponent
-import javax.sql.DataSource
-import org.h2.jdbcx.JdbcConnectionPool
 
 trait DatabaseService {
   val dbDriver: String

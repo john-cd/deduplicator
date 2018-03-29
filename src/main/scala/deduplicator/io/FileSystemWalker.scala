@@ -20,8 +20,8 @@ class FileSystemWalker extends LazyLogging {
       Files.walk(start, maxDepth) // consider option: FileVisitOption.FOLLOW_LINKS
         .iterator()
         .asScala
-        .filter(p => p.toFile.isFile)  // files only, not directories
-        .map( _.toAbsolutePath )
+        .filter(p => p.toFile.isFile) // files only, not directories
+        .map(_.toAbsolutePath)
         .map(f)
     }
   }

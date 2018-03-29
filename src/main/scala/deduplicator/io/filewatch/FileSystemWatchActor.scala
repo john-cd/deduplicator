@@ -71,7 +71,7 @@ class FileSystemWatchActor(actorToNotify: ActorRef) extends Actor with Timers wi
 
   def receive: Receive = {
     case Register(start, recurse) => if (wd != null) wd.register(start, recurse)
-    case Tick => {
+    case Tick =>
       //log.debug("tick!")
       if (wd != null)
       // poll() is not blocking:
@@ -80,7 +80,6 @@ class FileSystemWatchActor(actorToNotify: ActorRef) extends Actor with Timers wi
         while (wd.poll()) {}
       // re-arm the timer - better implementation than using periodic timer
       timers.startSingleTimer(TickKey, Tick, 5 second)
-    }
   }
 
 }

@@ -28,3 +28,7 @@ libraryDependencies += "com.h2database" % "h2" % "1.4.196" //% Test
 
 // Tests
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
+
+// Guava
+// https://mvnrepository.com/artifact/com.google.guava/guava
+libraryDependencies += "com.google.guava" % "guava" % "24.1-jre"

@@ -4,35 +4,40 @@ import java.nio.file._
 
 import com.typesafe.scalalogging.LazyLogging
 
+import scala.annotation.tailrec
 import scala.collection.JavaConverters._
 import scala.util.control.NonFatal
 
 
 class FileSystemWalker extends LazyLogging {
 
-  def walk[R](start: Path, f: Path => R, recurse: Boolean): Iterator[R] = {
+  private def _walk(start: Path, recurse: Boolean, maxDepth: Int = Int.MaxValue): Iterator[Path] = {
     try {
-
-
-      if (!Files.isDirectory(start)) { // single file
-        Iterator(f(start))
+      if (Files.isRegularFile(start, LinkOption.NOFOLLOW_LINKS)) {
+        Iterator(start)
+      }
+      else if (recurse && (maxDepth > 0) && Files.isDirectory(start)) {   // TODO check maxDepth
+        val ds = Files.newDirectoryStream(start)
+        ds.iterator().asScala
+          .flatMap(sub => _walk(sub, recurse, maxDepth - 1))
       }
       else {
-        val maxDepth = if (recurse) Int.MaxValue else 1
-
-        Files.walk(start, maxDepth) // consider option: FileVisitOption.FOLLOW_LINKS
-          .iterator()
-          .asScala
-          .filter(p => p.toFile.isFile) // files only, not directories
-          .map(_.toAbsolutePath)
-          .map(f)
+        Iterator.empty  // special file, directory in non-recurse mode
       }
     }
     catch {
       case NonFatal(e) =>
-        logger.error("FileSystemWalker.walk failure", e)
-        throw e
+        logger.error(s"FileSystemWalker.walk failure: ${e.getClass}")   // swallows exceptions
+        Iterator.empty
     }
+  }
+
+  def walk[R](start: Path, f: Path => R, recurse: Boolean, maxDepth: Int = Int.MaxValue): Iterator[R] = {
+    require(maxDepth > 0) // Int.Maxvalue for no limit
+    _walk(start, recurse, maxDepth)
+      .filter(p => Files.isRegularFile(p))    // files only, not directories
+      .map(_.toAbsolutePath)
+      .map(f)
   }
 }
 

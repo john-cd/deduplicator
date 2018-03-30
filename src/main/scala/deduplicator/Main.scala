@@ -10,6 +10,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
 import scala.util._
+import scala.util.control.NonFatal
 
 //noinspection SpellCheckingInspection,SpellCheckingInspection
 object Main extends LazyLogging {
@@ -41,36 +42,52 @@ object Main extends LazyLogging {
       // add a side effect (logging) to each future, without changing their return type
       val i2 = for {fut <- iter} yield fut.andThen {
         case Success(h) => logger.debug(s"${h.path} -> ${h.toHexString}")
-        case Failure(exc) => logger.warn("Hash failure: ", exc)
+        case Failure(exc) => logger.warn(s"Hash failure: ${exc.getClass} ${exc.getMessage}")
       }
 
-      val groupedFut = i2.grouped(500) // batch 500 future results
-        .map {
-        (group: Seq[Future[Hash]]) =>
-          successSequence(group) // convert to a future Seq of Hash, only for successful ones
-            .map(seq => daoService.insertHashes(seq.iterator)) // insert the batch of hashes in the DB
+      def insertGroupOfHashes(group: (Seq[Future[Hash]], Int)): Future[Int] = {
+        val result = successSequence(group._1) // future Seq of Hash, but only for successful Futures
+          .map(seq => daoService.insertHashes(seq.iterator)) // insert the batch of hashes in the DB; return Future[Traversable[Int]]
+          .map(insertResults => {
+          val sb = new StringBuilder()
+          println(insertResults.addString(sb, "<", ",", ">").result()) // print insert results and discard
+          group._2 // return group index
+        })
+        result.failed.foreach( ex => logger.warn(s"Insert failures for group ${group._2}", ex))  // log if the future is failed
+        result
       }
 
-
-      // return a Future of insert results, flattened
-      (for {iter <- Future.sequence(groupedFut)} yield for {res <- iter; tryInsert <- res} yield tryInsert)
-        .andThen { case _ => logger.info(s"Walking complete for $path") }
+      // batch hash results and insert in DB; returns list of group
+      val i3: Future[Iterator[Int]] = Future.sequence( i2.grouped(50000).zipWithIndex.map(insertGroupOfHashes) )
+      i3.andThen {
+        case _ => logger.info(s"Walking complete for $path")
+      }
     }
 
     // wait for all Futures to complete
-    Await.result(Future.sequence(allDone), Duration.Inf)
+    try {
+      Await.result(Future.sequence(allDone), Duration.Inf)
+    }
+    catch {
+      case NonFatal(e) =>
+        logger.error("Main.doWork throws ", e)
+    }
 
-    println("------------------------------- DETAILS -------------------------------")
-    daoService.readHashes.foreach(h => println(s" ${h.id.getOrElse(-1L)} [ ${new Timestamp(h.timeStamp)} ] ${h.path} --> ${h.toHexString}"))
-
-
-    println("------------------------------- DUPES -------------------------------")
-    daoService.findDuplicates.foreach(d => println(s" ${d.id} [ ${d.timeStamp} ] ${d.path} --> ${d.toHexString}"))
+    import java.io._
+    var pw: PrintWriter = null
+    try {
+      pw = new PrintWriter(new File("results.txt"))
+      pw.println("------------------------------- DETAILS -------------------------------")
+      daoService.readHashes.foreach(h => pw.println(s" ${h.id.getOrElse(-1L)} [ ${new Timestamp(h.timeStamp)} ] ${h.path} --> ${h.toHexString}"))
+      pw.println("------------------------------- DUPES -------------------------------")
+      daoService.findDuplicates.foreach(d => pw.println(s" ${d.id} [ ${d.timeStamp} ] ${d.path} --> ${d.toHexString}"))
+      pw.flush()
+    } finally {
+      pw.close
+    }
 
     //println(">>> Press ENTER to exit <<<")
     //import scala.io.StdIn
     //StdIn.readLine()
-
-
   } // doWork
 } // Main

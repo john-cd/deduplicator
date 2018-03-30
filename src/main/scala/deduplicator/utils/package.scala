@@ -18,6 +18,35 @@ package object utils {
 
   // Combinators for Futures
 
+  /** Execute the futures one after the other, and stop if one fails
+    *
+    * @see [[http://www.michaelpollmeier.com/execute-scala-futures-in-serial-one-after-the-other-non-blocking]]
+    * @param collection collection
+    * @param fn         transformation function
+    * @param ec         implicit execution context
+    * @param cbf        implicit that allows output collection building
+    * @tparam A type of input elements
+    * @tparam B output type
+    * @tparam C type of input collection
+    * @return a future collection of output elements
+    */
+  def serialiseFutures[A, B, C[A] <: Iterable[A]]
+  (collection: C[A])(fn: A => Future[B])(
+    implicit ec: ExecutionContext,
+    cbf: CanBuildFrom[C[B], B, C[B]]): Future[C[B]] = {
+
+    val builder = cbf()
+    builder.sizeHint(collection.size)
+
+    collection.foldLeft(Future(builder)) {
+      (previousFuture, next) =>
+        for {
+          previousResults <- previousFuture
+          next <- fn(next)
+        } yield previousResults += next
+    } map { builder => builder.result }
+  }
+
   /**
     * Takes a list of Futures and converts it to a Future of list of results,
     * removing all failed Futures

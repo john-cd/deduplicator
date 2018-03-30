@@ -7,8 +7,6 @@ CREATE TABLE hashes(
     hash BINARY NOT NULL
 );
 
---ALTER TABLE hashes ADD CONSTRAINT hashes_id PRIMARY KEY(id);
+CREATE HASH INDEX IX_hash ON hashes(hash);
 
-CREATE OR REPLACE VIEW hash_with_duplicates AS SELECT h.hash, COUNT(DISTINCT h.id) AS file_count FROM hashes AS h GROUP BY h.hash HAVING COUNT(DISTINCT h.id) >= 2;
-
-CREATE OR REPLACE VIEW duplicates AS SELECT h.id, h.filepath, h.hash, hwd.file_count FROM hash_with_duplicates AS hwd INNER JOIN hashes AS h ON hwd.hash = h.hash ORDER BY hwd.hash, h.filepath;
+CREATE INDEX IX_filepath ON hashes(filepath);

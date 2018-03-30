@@ -22,7 +22,6 @@ trait DaoServiceComponent {
   class DaoService extends LazyLogging {
 
     private var _ds: JdbcConnectionPool = _
-    private var _conn: Connection = _
 
     /** Loan pattern for JDBC connection
       *
@@ -33,29 +32,23 @@ trait DaoServiceComponent {
       * @return the return value of f
       */
     private def provideConnection[R](f: Connection => R): R = { // loan pattern
+      var conn: Connection = null
       try {
         if (_ds == null)
           _ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
-        if ((_conn == null) || _conn.isClosed)
-          _conn = _ds.getConnection
-        f(_conn)
+        conn = _ds.getConnection
+        f(conn)
       } finally {
-
-        if (!_conn.isClosed) {
-          if (!_conn.getAutoCommit) _conn.commit()
-          _conn.close()
-          _conn = null // not strictly necessary but GC friendly
-        }
-        if (_ds != null) {
-          _ds.dispose()
-          _ds = null // no way to know if object is disposed - null the var instead
+        if (!conn.isClosed) {
+          if (!conn.getAutoCommit) conn.commit()
+          conn.close()
         }
       }
     }
 
-    def insertHashes(hashes: Iterator[Hash]): Traversable[Try[String]] = provideConnection(conn => insertHashes(conn, hashes))
+    def insertHashes(hashes: Iterator[Hash]): Traversable[Int] = provideConnection(conn => insertHashes(conn, hashes))
 
-    private def insertHashes(connection: Connection, hashes: Iterator[Hash]): Traversable[Try[String]] = {
+    private def insertHashes(connection: Connection, hashes: Iterator[Hash]): Traversable[Int] = {
       var preparedStatement: PreparedStatement = null
       try {
         logger.info("Starting insertHashes")
@@ -69,11 +62,6 @@ trait DaoServiceComponent {
           preparedStatement.addBatch()
         }
         preparedStatement.executeBatch() // returns int[] which are > 0 if insert successful
-          .collect {
-          case Statement.SUCCESS_NO_INFO => Success("SUCCESS_NO_INFO")
-          case Statement.EXECUTE_FAILED => Failure(new Exception("EXECUTE_FAILED"))
-          case n if n > 0 => Success(s"Inserted $n row(s)")
-        }
       } finally {
         if (preparedStatement != null)
           preparedStatement.close()
@@ -88,8 +76,9 @@ trait DaoServiceComponent {
 
     def findDuplicates: Iterator[Dupes] = {
       logger.info("Starting findDuplicates")
-      val ds: JdbcConnectionPool = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
-      val conn: Connection = ds.getConnection
+      if (_ds == null)
+        _ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
+      val conn: Connection = _ds.getConnection
       val sql =
         """
           |SELECT h.id AS id, h.ts AS ts, h.filepath AS filepath, h.hash AS hash, hwd.file_count
@@ -117,7 +106,6 @@ trait DaoServiceComponent {
           // it's the last element
           if (!preparedStatement.isClosed) preparedStatement.close()
           if (!conn.isClosed) conn.close()
-          ds.dispose()
           logger.info("Stopping findDuplicates")
         }
         x
@@ -126,8 +114,9 @@ trait DaoServiceComponent {
 
     def readHashes: Iterator[Hash] = {
       logger.info("Starting readHashes")
-      val ds: JdbcConnectionPool = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
-      val conn: Connection = ds.getConnection
+      if (_ds == null)
+        _ds = JdbcConnectionPool.create(databaseService.connectionString, databaseService.username, databaseService.password)
+      val conn: Connection = _ds.getConnection
       val preparedStatement: PreparedStatement = conn.prepareStatement(
         "SELECT h.id, h.ts, h.filepath, h.hash FROM hashes AS h"
       )
@@ -146,7 +135,6 @@ trait DaoServiceComponent {
           // it's the last element
           if (!preparedStatement.isClosed) preparedStatement.close()
           if (!conn.isClosed) conn.close()
-          ds.dispose()
           logger.info("Stopping readHashes")
         }
         x

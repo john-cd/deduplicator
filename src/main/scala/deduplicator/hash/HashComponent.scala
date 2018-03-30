@@ -38,7 +38,7 @@ trait HashComponent {
       */
     def checksum(path: Path): Future[Hash] = {
       require(path != null)
-      logger.info(s"Starting checksum of $path")
+      logger.debug(s"Starting checksum of $path")
       try {
         val md = MessageDigest.getInstance("MD5")
         if (!Files.isReadable(path)) // readable = existing and accessible
@@ -50,7 +50,7 @@ trait HashComponent {
 
           // read a block of data and update the message digest
           def readFrom(position: Long): Future[Block] = fileAsyncIO.read(path, position)
-            .andThen { case Success(blk: Block) => md.update(blk.data) }
+            .andThen { case Success(blk: Block) if blk.data.length > 0 => md.update(blk.data) }
 
           def recurse(position: Long): Future[Block] = readFrom(position).flatMap {
             blk => if (blk.nextPosition != -1L) recurse(blk.nextPosition) else Future.successful(blk)
@@ -62,11 +62,11 @@ trait HashComponent {
       } // try
       catch {
         case NonFatal(e) =>
-          logger.info(s"checksum() throws $e")
+          logger.error(s"checksum() throws $e")
           throw e
       }
       finally {
-        logger.info(s"Completed checksum of $path")
+        logger.debug(s"Completed checksum of $path")
       }
     }
   } // HashService

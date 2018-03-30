@@ -27,7 +27,7 @@ case class Block(data: Array[Byte], nextPosition: Long) {
   */
 class FileAsyncIO extends LazyLogging {
 
-  private final val defaultBufferSize = 8 * 1024
+  private final val defaultBufferSize: Int = 8 * 1024
 
   /**
     * Asynchronously read (a portion of) a file, starting at a given position.
@@ -47,17 +47,20 @@ class FileAsyncIO extends LazyLogging {
       val fileSize = channel.size()
       val remainingBytes: Long = math.max(fileSize - position, 0L)
       if (fileSize == 0)
-        p.success(Block()) // "empty file"  // TODO test
-      if (remainingBytes <= 0)
-        p.success(Block()) // "position past the end of the file - no bytes to read!"  // TODO test
+        p.success(Block()) // "empty file"
+      else if (remainingBytes <= 0)
+        p.success(Block()) // "position past the end of the file - no bytes to read!"
       else {
-        val maxBufferSize = math.min(remainingBytes.toInt, Int.MaxValue) // files may be of length > 2^32  // TODO test
-        val buffer = ByteBuffer.allocate(math.min(if (desiredSize > 0) desiredSize else defaultBufferSize, maxBufferSize))
+        val maxBufferSize: Long = math.min(remainingBytes, Int.MaxValue) // files may be of length > 2^32
+        val capacity: Int = math.min( if (desiredSize > 0) desiredSize else defaultBufferSize, maxBufferSize.toInt )
+        val buffer = ByteBuffer.allocate(capacity)
         channel.read(buffer, position, buffer, onComplete(channel, position, p))
       }
     }
     catch {
-      case t: Throwable => p.failure(t)
+      case t: Throwable =>
+        logger.error("FileAsyncIO.read throws ", t)
+        p.tryFailure(t)
     }
     p.future
   }
@@ -71,7 +74,7 @@ class FileAsyncIO extends LazyLogging {
 
   private def onComplete(channel: AsynchronousFileChannel, initialPosition: Long, p: Promise[Block]) = new CompletionHandler[Integer, ByteBuffer]() {
     def completed(bytesRead: Integer, buffer: ByteBuffer): Unit = {
-      logger.info(s"Bytes read: $bytesRead")
+      logger.debug(s"Bytes read: $bytesRead")
       if (bytesRead == -1L)
         p.failure(new IOException("The given position was greater than or equal to the file's size at the time that the read is attempted."))
       else {

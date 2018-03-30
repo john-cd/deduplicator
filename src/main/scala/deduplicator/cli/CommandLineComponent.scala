@@ -9,7 +9,7 @@ trait CommandLineComponent {
 
   val commandLineService: CommandLineService
 
-  case class CommandLineConfig(pathStrings: Seq[String] = Seq(), recursive: Boolean = false)
+  case class CommandLineConfig(pathStrings: Seq[String] = Seq(), recursive: Boolean = false, test: Boolean = false)
 
   class CommandLineService extends LazyLogging {
 
@@ -19,6 +19,8 @@ trait CommandLineComponent {
       head("deduplicator", "0.x")
 
       opt[Unit]('r', "recursive").action((_, c) => c.copy(recursive = true)).text("Recurse through all children folders")
+
+      opt[Unit]('t', "test").hidden().action((_, c) => c.copy(test = true)).text("Test mode")
 
       arg[String]("<file>...").optional().withFallback(() => ".").unbounded().action((x, c) =>
         c.copy(pathStrings = c.pathStrings :+ x)).text("Optional file or directory path(s)")

@@ -19,12 +19,6 @@ libraryDependencies += "com.typesafe" % "config" % "1.3.1"
 // Commons
 libraryDependencies += "commons-codec" % "commons-codec" % "1.11"
 
-// Concurrency 
-libraryDependencies ++= Seq(
-  "com.typesafe.akka" %% "akka-actor" % "2.5.7",
-  "com.typesafe.akka" %% "akka-testkit" % "2.5.7" % Test
-)
-
 // Migration
 libraryDependencies += "org.flywaydb" % "flyway-core" % "4.2.0"
 
@@ -34,39 +28,3 @@ libraryDependencies += "com.h2database" % "h2" % "1.4.196" //% Test
 
 // Tests
 libraryDependencies += "org.scalatest" %% "scalatest" % "3.0.1" % "test"
-
-
-/*
-
-import sbt._
-import Keys._
-
-name := "deduplicator"
-
-lazy val commonSettings = Seq(
-  organization := "deduplicator",
-  version := "1.0-SNAPSHOT",
-  scalaVersion := "2.12.4"
-)
-
-lazy val overall = (project in file("."))
-  .settings(commonSettings)
-  .aggregate(sub1)
-
-lazy val common = (project in file("common"))
-  .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-      "org.flywaydb" % "flyway-core" % "4.1.2")
-  )
-
-lazy val sub1 = (project in file("slick"))
-  .settings(commonSettings)
-  .settings(
-    libraryDependencies ++= Seq(
-      "com.typesafe.slick" %% "slick" % "3.2.0"
-    )
-  )
-  .dependsOn(common)
-  
-*/  

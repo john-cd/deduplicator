@@ -20,9 +20,4 @@ class IOTest {
     //      println("isSymbolicLink   = " + attr.isSymbolicLink)
     //      println("size             = " + attr.size)
   }
-
-  //deduplicator.io.FileSystemWalker.walk( Paths.get( raw"src\test\resources\testfilesystem"), (path, attrs) => printAttr(path, attrs), recurse = false)
-  //deduplicator.io.FileSystemWalker.walk( Paths.get( raw"src\test\resources\testfilesystem"), (path, attrs) => printAttr(path, attrs), recurse = true)
-
-
 }
